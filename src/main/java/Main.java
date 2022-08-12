@@ -1,16 +1,41 @@
-import java.io.BufferedOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
-        final var server = new Server();
+        Server server = new Server();
+        server.addHandler("GET", "/index.html", (request, responseStream) -> {
+            responseStream.write((
+                    "HTTP/1.1 200 OK\r\n" +
+                            "Content-Type: " + request.getType() + "\r\n" +
+                            "Content-Length: " + request.getLength() + "\r\n" +
+                            "Connection: close\r\n" +
+                            "\r\n"
+            ).getBytes());
+            Files.copy(Path.of(".", "public", request.getPath()), responseStream);
+            responseStream.flush();
+
+        });
+
+        server.addHandler("POST", "/message", (request, responseStream) -> {
+            responseStream.write((
+                    "HTTP/1.1 200 OK\r\n" +
+                            "Content-Type: " + request.getType() + "\r\n" +
+                            "Content-Length: " + request.getLength() + "\r\n" +
+                            "Connection: close\r\n" +
+                            "\r\n"
+            ).getBytes());
+            Files.copy(Path.of(".", "public", request.getPath()), responseStream);
+            responseStream.flush();
+
+        });
+
+
+
+
         server.start(9999);
 
-        server.addHandler("GET", "/messages", new Handler() {
-            @Override
-            public void handle(Request request, BufferedOutputStream responseStream) {
 
-            }
-        });
 
 
     }
