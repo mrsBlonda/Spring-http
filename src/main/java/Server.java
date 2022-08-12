@@ -7,14 +7,19 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Handler;
 
 
 public class Server {
     final ExecutorService executorService = Executors.newFixedThreadPool(64);
     final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
+    final HashMap<String, HashMap<String, Handler>> handlers = null;
+
+
 
     public void start(int port) {
         System.out.println("Сервер начал выполнение");
@@ -112,6 +117,17 @@ public class Server {
         successfulRequest(filePath, out, mimeType);
 
 
+
+    }
+
+
+    public void addHandler(String method, String message, Handler handler) {
+        if(!handlers.containsKey(method)) {
+            handlers.put(method, new HashMap<String, Handler>());
+            handlers.get(method).put(message, handler);
+        } else {
+            handlers.get(method).put(message, handler);
+        }
 
     }
 
