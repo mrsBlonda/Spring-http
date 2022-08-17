@@ -4,7 +4,7 @@ import java.nio.file.Path;
 public class Main {
     public static void main(String[] args) {
         Server server = new Server();
-        server.addHandler("GET", "/index.html", (request, responseStream) -> {
+        server.addHandler("GET", "/classic.html", (request, responseStream) -> {
             responseStream.write((
                     "HTTP/1.1 200 OK\r\n" +
                             "Content-Type: " + request.getType() + "\r\n" +
@@ -17,7 +17,7 @@ public class Main {
 
         });
 
-        server.addHandler("POST", "/message", (request, responseStream) -> {
+        server.addHandler("POST", "message", (request, responseStream) -> {
             responseStream.write((
                     "HTTP/1.1 200 OK\r\n" +
                             "Content-Type: " + request.getType() + "\r\n" +

@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 
 public class Server {
     final ExecutorService executorService = Executors.newFixedThreadPool(64);
-    final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
+
     private final Map<String, Map<String, Handler>> handlers;
     final List<String> allowedMethods = List.of("GET", "POST");
 
@@ -187,7 +187,7 @@ public class Server {
         final var out = new BufferedOutputStream(socket.getOutputStream());
         Request request = parse(socket, in, out);
         if (handlers.containsKey(request.method) && handlers.get(request.method).containsKey(request.path)) {
-            successfulRequest(request, out);
+            handlers.get(request.getMethod()).get(request.getPath()).handle(request, out);
         } else {
             badRequest(out);
         }

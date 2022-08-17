@@ -8,9 +8,7 @@ public class Request {
     public String method;
     public String body;
     public List<String> headers;
-
-    private String type;
-    private int length;
+    private long length;
     public String path;
 
     public Request(String method, String body, String path, List<String> headers) {
@@ -22,13 +20,18 @@ public class Request {
     }
 
 
-    public String getType() {
-        return type;
+    public String getType() throws IOException {
+        var filePath = Path.of(".", "public", getPath());
+        var mimeType = Files.probeContentType(filePath);
+        return mimeType;
+    }
+    public String getMethod() {
+        return method;
     }
 
-    public int getLength() throws IOException {
+    public long getLength() throws IOException {
         var filePath = Path.of(".", "public", getPath());
-        Files.size(filePath);
+        length = Files.size(filePath);
         return length;
     }
 
