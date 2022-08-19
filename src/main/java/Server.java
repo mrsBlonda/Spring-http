@@ -53,46 +53,9 @@ public class Server {
 
 
 
-    public void badRequest(BufferedOutputStream out) throws IOException {
-        out.write((
-                "HTTP/1.1 404 Not Found\r\n" +
-                        "Content-Length: 0\r\n" +
-                        "Connection: close\r\n" +
-                        "\r\n"
-        ).getBytes());
-        out.flush();
-    }
 
-    public void timeRequest(Path filePath, BufferedOutputStream out, String mimeType) throws IOException {
-        final var template = Files.readString(filePath);
-        final var content = template.replace(
-                "{time}",
-                LocalDateTime.now().toString()
-        ).getBytes();
-        out.write((
-                "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: " + mimeType + "\r\n" +
-                        "Content-Length: " + content.length + "\r\n" +
-                        "Connection: close\r\n" +
-                        "\r\n"
-        ).getBytes());
-        out.write(content);
-        out.flush();
-    }
 
-    public void successfulRequest(Request request, BufferedOutputStream out) throws IOException {
 
-        var filePath = Path.of(".", "public", request.getPath());
-        out.write((
-                "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: " + request.getType() + "\r\n" +
-                        "Content-Length: " + request.getLength() + "\r\n" +
-                        "Connection: close\r\n" +
-                        "\r\n"
-        ).getBytes());
-        Files.copy(filePath, out);
-        out.flush();
-    }
 
 
 
@@ -121,27 +84,27 @@ public class Server {
         final var requestLineDelimiter = new byte[]{'\r', '\n'};
         final var requestLineEnd = indexOf(buffer, requestLineDelimiter, 0, read);
         if (requestLineEnd == -1) {
-            badRequest(out);
+            Request.badRequest(out);
             socket.close();
         }
 
         // читаем request line
         final var requestLine = new String(Arrays.copyOf(buffer, requestLineEnd)).split(" ");
         if (requestLine.length != 3) {
-            badRequest(out);
+            Request.badRequest(out);
             socket.close();
         }
 
         final var method = requestLine[0];
         if (!allowedMethods.contains(method)) {
-            badRequest(out);
+            Request.badRequest(out);
             socket.close();
         }
         System.out.println(method);
 
         final var path = requestLine[1];
         if (!path.startsWith("/")) {
-            badRequest(out);
+            Request.badRequest(out);
             socket.close();
         }
         System.out.println(path);
@@ -151,7 +114,7 @@ public class Server {
         final var headersStart = requestLineEnd + requestLineDelimiter.length;
         final var headersEnd = indexOf(buffer, headersDelimiter, headersStart, read);
         if (headersEnd == -1) {
-            badRequest(out);
+            Request.badRequest(out);
             socket.close();
         }
 
@@ -189,7 +152,7 @@ public class Server {
         if (handlers.containsKey(request.method) && handlers.get(request.method).containsKey(request.path)) {
             handlers.get(request.getMethod()).get(request.getPath()).handle(request, out);
         } else {
-            badRequest(out);
+            Request.badRequest(out);
         }
     }
     private int indexOf(byte[] array, byte[] target, int start, int max) {
