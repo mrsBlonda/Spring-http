@@ -41,24 +41,11 @@ public class Server {
                         e.printStackTrace();
                     }
                 });
-
-
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
-
-
-
-
-
-
-
 
     public void addHandler(String method, String message, Handler handler) {
         if(!handlers.containsKey(method)) {
@@ -72,8 +59,6 @@ public class Server {
     }
 
     public Request parse(Socket socket, BufferedInputStream in, BufferedOutputStream out) throws IOException {
-
-
         final var limit = 4096;
 
         in.mark(limit);
@@ -149,12 +134,13 @@ public class Server {
         final var in = new BufferedInputStream(socket.getInputStream());
         final var out = new BufferedOutputStream(socket.getOutputStream());
         Request request = parse(socket, in, out);
-        if (handlers.containsKey(request.method) && handlers.get(request.method).containsKey(request.path)) {
+        if (handlers.containsKey(request.getMethod()) && handlers.get(request.getMethod()).containsKey(request.getPath())) {
             handlers.get(request.getMethod()).get(request.getPath()).handle(request, out);
         } else {
             Request.badRequest(out);
         }
     }
+    
     private int indexOf(byte[] array, byte[] target, int start, int max) {
         outer:
         for (int i = start; i < max - target.length + 1; i++) {
@@ -175,6 +161,4 @@ public class Server {
                 .map(String::trim)
                 .findFirst();
     }
-
-
 }
