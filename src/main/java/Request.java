@@ -7,17 +7,16 @@ import java.util.List;
 
 public class Request {
 
-    public String method;
-    public String body;
-    public List<String> headers;
+    private String method;
+    private String body;
+    private List<String> headers;
     private long length;
-    public String path;
+    private String path;
 
     public Request(String method, String body, String path, List<String> headers) {
         this.method = method;
         this.body = body;
         this.headers = headers;
-
         this.path = path;
     }
 
