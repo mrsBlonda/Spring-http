@@ -81,11 +81,11 @@ public class Request {
     public List<NameValuePair> getQueryParams() {
         return queryParams;
     }
-    public NameValuePair getQueryParam(String name) {
-        NameValuePair queryParam = null;
+    public List<NameValuePair> getQueryParam(String name) {
+        List<NameValuePair> queryParam = null;
         for (NameValuePair query : queryParams) {
             if (query.getName().equals(name)) 
-                queryParam = query;
+                queryParam.add(query);
         }
         return queryParam;
 
