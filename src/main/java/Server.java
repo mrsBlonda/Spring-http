@@ -1,9 +1,10 @@
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -39,26 +40,15 @@ public class Server {
 
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
                     }
                 });
-
-
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
-
-
-
-
-
-
-
 
     public void addHandler(String method, String message, Handler handler) {
         if(!handlers.containsKey(method)) {
@@ -71,7 +61,7 @@ public class Server {
 
     }
 
-    public Request parse(Socket socket, BufferedInputStream in, BufferedOutputStream out) throws IOException {
+    public Request parse(Socket socket, BufferedInputStream in, BufferedOutputStream out) throws IOException, URISyntaxException {
 
 
         final var limit = 4096;
@@ -109,6 +99,12 @@ public class Server {
         }
         System.out.println(path);
 
+        URIBuilder uriBuilder = new URIBuilder(path);
+        var queryParams = uriBuilder.getQueryParams();
+        for (NameValuePair query : queryParams) {
+            System.out.println("Query параметр: " + query);
+        }
+
         // ищем заголовки
         final var headersDelimiter = new byte[]{'\r', '\n', '\r', '\n'};
         final var headersStart = requestLineEnd + requestLineDelimiter.length;
@@ -141,18 +137,18 @@ public class Server {
                 System.out.println(body);
             }
         }
-
-        return new Request(method, body, path, headers);
+        return new Request(method, body, path, headers, queryParams);
     }
 
-    public void answer(Socket socket) throws IOException {
+    public void answer(Socket socket) throws IOException, URISyntaxException {
         final var in = new BufferedInputStream(socket.getInputStream());
         final var out = new BufferedOutputStream(socket.getOutputStream());
         Request request = parse(socket, in, out);
-        if (handlers.containsKey(request.method) && handlers.get(request.method).containsKey(request.path)) {
+        if (handlers.containsKey(request.getMethod()) && handlers.get(request.getMethod()).containsKey(request.getPath())) {
             handlers.get(request.getMethod()).get(request.getPath()).handle(request, out);
         } else {
             Request.badRequest(out);
+
         }
     }
     private int indexOf(byte[] array, byte[] target, int start, int max) {

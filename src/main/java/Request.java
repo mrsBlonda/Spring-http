@@ -1,3 +1,4 @@
+import org.apache.http.NameValuePair;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,19 +7,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class Request {
-
-    public String method;
-    public String body;
-    public List<String> headers;
+    private String method;
+    private String body;
+    private List<String> headers;
     private long length;
-    public String path;
+    private String path;
 
-    public Request(String method, String body, String path, List<String> headers) {
+    private List<NameValuePair> queryParams;
+
+    public Request(String method, String body, String path, List<String> headers, List<NameValuePair> queryParams) {
         this.method = method;
         this.body = body;
         this.headers = headers;
-
         this.path = path;
+        this.queryParams = queryParams;
     }
 
     public static void successfulRequest(Request request, BufferedOutputStream out) throws IOException {
@@ -40,7 +42,6 @@ public class Request {
         ).getBytes());
         out.flush();
     }
-
     public static void timeRequest(Request request, BufferedOutputStream out) throws IOException {
         var filePath = Path.of(".", "public", request.getPath());
         final var template = Files.readString(filePath);
@@ -58,8 +59,6 @@ public class Request {
         out.write(content);
         out.flush();
     }
-
-
     public String getType() throws IOException {
         var filePath = Path.of(".", "public", getPath());
         var mimeType = Files.probeContentType(filePath);
@@ -77,5 +76,18 @@ public class Request {
 
     public String getPath() {
         return path;
+    }
+
+    public List<NameValuePair> getQueryParams() {
+        return queryParams;
+    }
+    public NameValuePair getQueryParam(String name) {
+        NameValuePair queryParam = null;
+        for (NameValuePair query : queryParams) {
+            if (query.getName().equals(name)) 
+                queryParam = query;
+        }
+        return queryParam;
+
     }
 }
