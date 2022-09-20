@@ -20,14 +20,14 @@ public class Main {
 
         });
 
-        server.addHandler("POST", "message", (request, responseStream) -> {
+        server.addHandler("POST", "/classic.html", (request, responseStream) -> {
             Request.successfulRequest(request, responseStream);
             Files.copy(Path.of(".", "public", request.getPath()), responseStream);
             responseStream.flush();
 
         });
 
-        server.start(9999);
+        server.start(8080);
     }
 }
 
